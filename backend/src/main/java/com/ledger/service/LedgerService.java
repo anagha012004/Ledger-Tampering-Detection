@@ -47,6 +47,15 @@ public class LedgerService {
                 node.setTampered(false);
                 nodeRepository.save(node);
             }
+        } else {
+            // On restart, recompute hashes from actual transactions to clear stale tampered state
+            nodeRepository.findAll().forEach(node -> {
+                List<Transaction> txList = transactionRepository.findByNodeIdOrderByTimestampAsc(node.getNodeId());
+                node.setMerkleRoot(hashService.calculateMerkleRoot(txList));
+                node.setLedgerHash(hashService.generateHash(node.getMerkleRoot()));
+                node.setTampered(false);
+                nodeRepository.save(node);
+            });
         }
         if (userRepository.count() == 0) {
             userRepository.save(new User(null, "admin",    passwordEncoder.encode("admin123"),  User.Role.ADMIN));
@@ -236,8 +245,8 @@ public class LedgerService {
         return errors;
     }
 
-    // Scheduled real-time monitoring every 60 seconds
-    @Scheduled(fixedDelay = 60000)
+    // Scheduled real-time monitoring — initial delay of 60s so it doesn't fire on startup
+    @Scheduled(initialDelay = 60000, fixedDelay = 60000)
     public void scheduledIntegrityCheck() {
         Map<String, Object> result = detectTampering();
         boolean tampered = Boolean.TRUE.equals(result.get("tamperingDetected"));
