@@ -16,7 +16,7 @@ export function useAlertSocket(onMessage) {
 
   useEffect(() => {
     const client = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+      webSocketFactory: () => new SockJS(`${window.location.origin}/ws`),
       reconnectDelay: 5000,
       onConnect: () => {
         client.subscribe('/topic/alerts', frame => {
