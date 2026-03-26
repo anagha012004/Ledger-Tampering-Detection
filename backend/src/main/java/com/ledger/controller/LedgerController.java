@@ -9,7 +9,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"}, allowedHeaders = "*")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class LedgerController {
 
     private final LedgerService   ledgerService;
