@@ -5,7 +5,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.security.Key;
-import java.util.Base64;
+import java.util.Arrays;
 import java.util.Date;
 
 @Component
@@ -15,7 +15,12 @@ public class JwtUtil {
     private final Key key;
 
     public JwtUtil(@Value("${jwt.secret}") String secret) {
-        this.key = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secret));
+        // Accept plain text secret — pad or hash to ensure minimum 256-bit key length
+        byte[] keyBytes = secret.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        if (keyBytes.length < 32) {
+            keyBytes = Arrays.copyOf(keyBytes, 32);
+        }
+        this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String generateToken(String username, String role) {
