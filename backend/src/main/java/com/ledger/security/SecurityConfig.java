@@ -22,29 +22,51 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                // Public
-                .requestMatchers("/api/auth/login", "/api/auth/signup", "/h2-console/**", "/ws/**").permitAll()
-                // Viewer: read-only
-                .requestMatchers(HttpMethod.GET, "/api/nodes/**", "/api/integrity",
-                                 "/api/alerts/**", "/api/audit/**").hasAnyRole("VIEWER","USER","AUDITOR","ADMIN")
-                // User: add transactions
-                .requestMatchers(HttpMethod.POST, "/api/transaction").hasAnyRole("USER","AUDITOR","ADMIN")
-                // Auditor: detect + forensics + reports
-                .requestMatchers(HttpMethod.GET, "/api/detect", "/api/forensics/**",
-                                 "/api/report/**", "/api/snapshots/**",
-                                 "/api/security/publickey").hasAnyRole("AUDITOR","ADMIN")
-                .requestMatchers("/api/tamper", "/api/reset", "/api/users/**",
-                                 "/api/transaction/update", "/api/snapshots/create").hasRole("ADMIN")
-                .anyRequest().authenticated()
-            )
-            .headers(h -> h.frameOptions(f -> f.disable())) // allow H2 console
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-        return http.build();
-    }
+   @Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(auth -> auth
+
+            // Public pages
+            .requestMatchers(
+                    "/",
+                    "/index.html",
+                    "/css/**",
+                    "/js/**",
+                    "/images/**",
+                    "/api/auth/login",
+                    "/api/auth/signup",
+                    "/h2-console/**",
+                    "/ws/**"
+            ).permitAll()
+
+            // Viewer: read-only
+            .requestMatchers(HttpMethod.GET, "/api/nodes/**", "/api/integrity",
+                    "/api/alerts/**", "/api/audit/**")
+                    .hasAnyRole("VIEWER","USER","AUDITOR","ADMIN")
+
+            // User: add transactions
+            .requestMatchers(HttpMethod.POST, "/api/transaction")
+                    .hasAnyRole("USER","AUDITOR","ADMIN")
+
+            // Auditor
+            .requestMatchers(HttpMethod.GET, "/api/detect", "/api/forensics/**",
+                    "/api/report/**", "/api/snapshots/**",
+                    "/api/security/publickey")
+                    .hasAnyRole("AUDITOR","ADMIN")
+
+            // Admin
+            .requestMatchers("/api/tamper", "/api/reset", "/api/users/**",
+                    "/api/transaction/update", "/api/snapshots/create")
+                    .hasRole("ADMIN")
+
+            .anyRequest().authenticated()
+        )
+        .headers(h -> h.frameOptions(f -> f.disable()))
+        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+    return http.build();
+}
 }
