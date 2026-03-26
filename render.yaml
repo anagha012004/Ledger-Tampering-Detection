@@ -2,7 +2,6 @@ services:
   - type: web
     name: ledger-tampering-detection
     runtime: java
-    rootDir: backend
     buildCommand: cd ../frontend && npm install && npm run build && cd ../backend && mvn clean package -DskipTests
     startCommand: java -jar target/ledger-tampering-detection-1.0.0.jar
     envVars:
