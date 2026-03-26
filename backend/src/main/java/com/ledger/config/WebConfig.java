@@ -9,8 +9,6 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        // Forward SPA routes to index.html, but NOT static asset paths
-        registry.addViewController("/{path:^(?!assets|favicon|icons)[^\\.]*}").setViewName("forward:/index.html");
-        registry.addViewController("/{path:^(?!assets|favicon|icons)[^\\.]*}/**").setViewName("forward:/index.html");
+        registry.addViewController("/{path:[^\\.]*}").setViewName("forward:/index.html");
     }
 }
