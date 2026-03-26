@@ -1,0 +1,93 @@
+.page { padding: 28px; max-width: 1200px; margin: 0 auto; }
+
+.panel {
+  background: #fff;
+  padding: 22px 24px;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.14);
+  margin-bottom: 22px;
+}
+.panel h3 { color: #667eea; font-size: 1.1em; margin-bottom: 16px; }
+
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.row select {
+  padding: 10px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 13px;
+  min-width: 140px;
+  outline: none;
+}
+.row button {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.row button:hover { opacity: 0.88; }
+.row button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.alertSuccess { background: #d4edda; border: 2px solid #c3e6cb; }
+.alertDanger  { background: #fff5f5; border: 2px solid #f5c6cb; }
+
+.summaryRow { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; flex-wrap: wrap; }
+.summaryNode { font-size: 1.3em; font-weight: 800; color: #333; }
+.summaryStatus { padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 0.85em; }
+.statusOk  { background: #28a745; color: #fff; }
+.statusBad { background: #dc3545; color: #fff; }
+.summaryMeta { font-size: 0.88em; color: #666; }
+
+.merkleRow { display: flex; align-items: center; gap: 10px; font-size: 0.85em; color: #555; flex-wrap: wrap; }
+.merkle { font-family: monospace; word-break: break-all; color: #333; font-size: 0.9em; }
+
+.errTitle { color: #dc3545; font-size: 0.95em; margin-bottom: 12px; }
+.txTitle  { color: #667eea; font-size: 0.95em; margin-bottom: 12px; }
+
+.errCard {
+  background: #fff5f5;
+  border: 1px solid #f5c6cb;
+  border-left: 4px solid #dc3545;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+.errHeader { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+.errTime { font-size: 0.8em; color: #888; font-family: monospace; }
+.sigBadge { padding: 2px 8px; border-radius: 10px; font-size: 0.78em; font-weight: 700; }
+.sigOk  { background: #d4edda; color: #155724; }
+.sigBad { background: #f8d7da; color: #721c24; }
+
+.hashRow { font-size: 0.8em; color: #555; margin-bottom: 4px; display: flex; gap: 8px; flex-wrap: wrap; }
+.hashRow span { color: #888; min-width: 65px; }
+.hashRow code { font-family: monospace; word-break: break-all; color: #333; }
+
+.tableWrap { overflow-x: auto; max-height: 420px; overflow-y: auto; border-radius: 8px; border: 1px solid #e9ecef; }
+.table { width: 100%; border-collapse: collapse; font-size: 0.83em; }
+.table thead th {
+  background: #667eea;
+  color: #fff;
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  white-space: nowrap;
+}
+.table tbody tr { border-bottom: 1px solid #f0f0f0; }
+.table tbody tr:hover { background: #f8f9ff; }
+.table td { padding: 9px 12px; color: #444; vertical-align: middle; }
+
+.mono { font-family: monospace; font-size: 0.82em; white-space: nowrap; }
+.hashCell { font-family: monospace; font-size: 0.8em; color: #888; }
+.typeBadge {
+  background: #e9ecef;
+  color: #495057;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.78em;
+  font-weight: 600;
+}

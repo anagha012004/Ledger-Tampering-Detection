@@ -1,0 +1,93 @@
+.card {
+  background: #fff;
+  padding: 18px;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  transition: transform 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.card:hover { transform: translateY(-3px); }
+
+.tampered { border: 2px solid #dc3545; background: #fff8f8; }
+.safe     { border: 2px solid #28a745; background: #f6fff8; }
+
+/* ── Real-time status indicator ── */
+.indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72em;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+
+.indicatorSecure   { background: #d4edda; color: #155724; }
+.indicatorTampered { background: #f8d7da; color: #721c24; }
+
+/* Animated pulse dot */
+.pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  animation: blink 1.4s ease-in-out infinite;
+}
+.indicatorSecure   .pulse { background: #28a745; }
+.indicatorTampered .pulse { background: #dc3545; }
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}
+
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+
+.nodeId { font-size: 1.25em; font-weight: 700; color: #667eea; }
+
+.status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.82em;
+}
+.statusOk  { background: #28a745; color: #fff; }
+.statusBad { background: #dc3545; color: #fff; }
+
+.label { font-size: 0.78em; color: #888; margin-bottom: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+
+.hash {
+  background: #f4f5f7;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.73em;
+  word-break: break-all;
+  color: #495057;
+  border: 1px solid #e9ecef;
+}
+
+.txHeader { margin-top: 14px; font-weight: 700; font-size: 0.88em; color: #444; margin-bottom: 8px; }
+
+.txList { max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; }
+
+.txItem {
+  background: #f8f9fa;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border-left: 3px solid #667eea;
+  font-size: 0.83em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.arrow { color: #666; }
+.amount { color: #28a745; }
+.txType { color: #aaa; font-size: 0.85em; margin-left: auto; }
+
+.empty { color: #bbb; font-size: 0.88em; font-style: italic; }

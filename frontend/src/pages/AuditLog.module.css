@@ -1,0 +1,76 @@
+.page { padding: 28px; max-width: 1400px; margin: 0 auto; }
+
+.panel {
+  background: #fff;
+  padding: 22px 24px;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.14);
+}
+
+.header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.header h3 { color: #667eea; font-size: 1.1em; margin: 0; }
+.count { font-size: 0.82em; color: #888; margin-left: 4px; }
+.refresh {
+  margin-left: auto;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 0.82em;
+  font-weight: 600;
+  cursor: pointer;
+}
+.refresh:hover { opacity: 0.88; }
+
+.toolbar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.toolbar input, .toolbar select {
+  padding: 9px 13px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 13px;
+  outline: none;
+  flex: 1;
+  min-width: 160px;
+  transition: border-color 0.2s;
+}
+.toolbar input:focus, .toolbar select:focus { border-color: #667eea; }
+
+.tableWrap { overflow-x: auto; max-height: 480px; overflow-y: auto; border-radius: 8px; border: 1px solid #e9ecef; }
+
+.table { width: 100%; border-collapse: collapse; font-size: 0.84em; }
+.table thead th {
+  background: #667eea;
+  color: #fff;
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  white-space: nowrap;
+}
+.table tbody tr { border-bottom: 1px solid #f0f0f0; transition: background 0.12s; }
+.table tbody tr:hover { background: #f8f9ff; }
+.table td { padding: 9px 12px; color: #444; vertical-align: middle; }
+
+.num  { color: #bbb; font-size: 0.82em; }
+.mono { font-family: 'Courier New', monospace; font-size: 0.82em; white-space: nowrap; }
+.ip   { font-size: 0.82em; color: #888; }
+.details { max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.empty { text-align: center; color: #aaa; padding: 28px; font-style: italic; }
+
+.badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 12px;
+  font-size: 0.78em;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.login    { background: #d4edda; color: #155724; }
+.add      { background: #cce5ff; color: #004085; }
+.tamper   { background: #f8d7da; color: #721c24; }
+.detect   { background: #fff3cd; color: #856404; }
+.reset    { background: #f5c6cb; color: #491217; }
+.reversal { background: #e2d9f3; color: #4a235a; }
+.def      { background: #e9ecef; color: #495057; }
