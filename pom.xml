@@ -11,7 +11,4 @@
     <packaging>pom</packaging>
     <name>Ledger Tampering Detection - Parent</name>
 
-    <modules>
-        <module>backend</module>
-    </modules>
 </project>

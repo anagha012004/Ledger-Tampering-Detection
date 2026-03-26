@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: ledger-tampering-detection
+    runtime: java
+    rootDir: backend
+    buildCommand: cd ../frontend && npm install && npm run build && cd ../backend && mvn clean package -DskipTests
+    startCommand: java -jar target/ledger-tampering-detection-1.0.0.jar
+    envVars:
+      - key: JWT_SECRET
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+      - key: MAIL_ENABLED
+        value: "false"
