@@ -1,6 +1,10 @@
 import axios from 'axios'
 
-const api = axios.create({ baseURL: '/api' })
+// In dev, Vite proxy forwards /api → localhost:8080
+// In production (Render), set VITE_API_URL=https://your-backend.onrender.com
+const BASE = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : '/api'
+
+const api = axios.create({ baseURL: BASE })
 
 api.interceptors.request.use(cfg => {
   const token = localStorage.getItem('token')

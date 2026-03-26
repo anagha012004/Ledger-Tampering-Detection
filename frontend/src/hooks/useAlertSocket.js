@@ -2,21 +2,21 @@ import { useEffect, useRef } from 'react'
 import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
 
-/**
- * Connects to the Spring STOMP broker at /ws and subscribes to /topic/alerts.
- * Calls onMessage(payload) for every frame received.
- * Automatically reconnects on disconnect.
- */
+// In dev, backend is on localhost:8080.
+// In production, VITE_API_URL = https://your-backend.onrender.com
+const WS_URL = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/ws`
+  : `${window.location.protocol}//${window.location.hostname}:8080/ws`
+
 export function useAlertSocket(onMessage) {
-  const clientRef  = useRef(null)
+  const clientRef   = useRef(null)
   const callbackRef = useRef(onMessage)
 
-  // Keep callback ref fresh without restarting the socket
   useEffect(() => { callbackRef.current = onMessage }, [onMessage])
 
   useEffect(() => {
     const client = new Client({
-      webSocketFactory: () => new SockJS(`${window.location.origin}/ws`),
+      webSocketFactory: () => new SockJS(WS_URL),
       reconnectDelay: 5000,
       onConnect: () => {
         client.subscribe('/topic/alerts', frame => {
