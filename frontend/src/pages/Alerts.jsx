@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { getAlerts, resolveAlert } from '../api'
+import { useAuth } from '../context/AuthContext'
 import styles from './Alerts.module.css'
 
 export default function Alerts() {
+  const { auth } = useAuth()
+  const canResolve = ['AUDITOR', 'ADMIN'].includes(auth?.role)
   const [alerts,  setAlerts]  = useState([])
   const [loading, setLoading] = useState(false)
   const pollRef = useRef(null)
@@ -68,7 +71,7 @@ export default function Alerts() {
               <span className={styles.allClearIcon}>✅</span>
               <span>No active alerts — all nodes are clean</span>
             </div>
-          : active.map(a => <AlertCard key={a.id} alert={a} onResolve={handleResolve} />)
+          : active.map(a => <AlertCard key={a.id} alert={a} onResolve={handleResolve} canResolve={canResolve} />)
         }
       </div>
 
@@ -86,7 +89,7 @@ export default function Alerts() {
   )
 }
 
-function AlertCard({ alert: a, onResolve, resolved }) {
+function AlertCard({ alert: a, onResolve, resolved, canResolve }) {
   const sevKey = (a.severity || 'HIGH').toLowerCase()
   return (
     <div className={`${styles.card} ${resolved ? styles.cardResolved : styles.cardActive}`}>
@@ -94,9 +97,9 @@ function AlertCard({ alert: a, onResolve, resolved }) {
         <span className={styles.node}>{a.nodeId}</span>
         <span className={`${styles.sev} ${styles['sev_' + sevKey]}`}>{a.severity}</span>
         <span className={styles.time}>{a.detectedAt?.replace('T', ' ').substring(0, 19)}</span>
-        {!resolved
+        {!resolved && canResolve
           ? <button className={styles.resolveBtn} onClick={() => onResolve(a.id)}>✓ Resolve</button>
-          : <span className={styles.resolvedTag}>✓ RESOLVED</span>
+          : resolved ? <span className={styles.resolvedTag}>✓ RESOLVED</span> : null
         }
       </div>
       <div className={styles.detail}>{a.details}</div>

@@ -22,13 +22,13 @@ export default function Navbar() {
   const handleLogout = () => { signOut(); navigate('/') }
 
   const links = [
-    { to: '/dashboard',  label: '🖥 Nodes',     adminOnly: false },
-    { to: '/audit',      label: '📋 Audit Log',  adminOnly: false },
-    { to: '/alerts',     label: '🚨 Alerts',     adminOnly: false },
-    { to: '/integrity',  label: '🔐 Integrity',  adminOnly: false },
-    { to: '/snapshots',  label: '📸 Snapshots',  adminOnly: false },
-    { to: '/forensics',  label: '🔬 Forensics',  adminOnly: false },
-    { to: '/users',      label: '👥 Users',      adminOnly: true  },
+    { to: '/dashboard',  label: '🖥 Nodes',     roles: ['VIEWER','USER','AUDITOR','ADMIN'] },
+    { to: '/audit',      label: '📋 Audit Log',  roles: ['VIEWER','USER','AUDITOR','ADMIN'] },
+    { to: '/alerts',     label: '🚨 Alerts',     roles: ['VIEWER','USER','AUDITOR','ADMIN'] },
+    { to: '/integrity',  label: '🔐 Integrity',  roles: ['VIEWER','USER','AUDITOR','ADMIN'] },
+    { to: '/snapshots',  label: '📸 Snapshots',  roles: ['AUDITOR','ADMIN'] },
+    { to: '/forensics',  label: '🔬 Forensics',  roles: ['AUDITOR','ADMIN'] },
+    { to: '/users',      label: '👥 Users',      roles: ['ADMIN'] },
   ]
 
   return (
@@ -36,7 +36,7 @@ export default function Navbar() {
       <span className={styles.brand}>🔒 Ledger Security</span>
       <div className={styles.links}>
         {links
-          .filter(l => !l.adminOnly || auth?.role === 'ADMIN')
+          .filter(l => l.roles.includes(auth?.role))
           .map(l => (
             <NavLink key={l.to} to={l.to} className={({ isActive }) => isActive ? `${styles.link} ${styles.active}` : styles.link}>
               {l.label}

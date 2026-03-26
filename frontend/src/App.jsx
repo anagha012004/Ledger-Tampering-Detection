@@ -16,10 +16,10 @@ function PrivateRoute({ children }) {
   return auth ? children : <Navigate to="/" replace />
 }
 
-function AdminRoute({ children }) {
+function RoleRoute({ children, roles }) {
   const { auth } = useAuth()
   if (!auth) return <Navigate to="/" replace />
-  if (auth.role !== 'ADMIN') return <Navigate to="/dashboard" replace />
+  if (!roles.includes(auth.role)) return <Navigate to="/dashboard" replace />
   return children
 }
 
@@ -43,9 +43,9 @@ export default function App() {
           <Route path="/audit"     element={<PrivateRoute><Layout><AuditLog  /></Layout></PrivateRoute>} />
           <Route path="/alerts"    element={<PrivateRoute><Layout><Alerts    /></Layout></PrivateRoute>} />
           <Route path="/integrity" element={<PrivateRoute><Layout><Integrity /></Layout></PrivateRoute>} />
-          <Route path="/snapshots" element={<PrivateRoute><Layout><Snapshots /></Layout></PrivateRoute>} />
-          <Route path="/forensics" element={<PrivateRoute><Layout><Forensics /></Layout></PrivateRoute>} />
-          <Route path="/users"     element={<AdminRoute><Layout><Users /></Layout></AdminRoute>} />
+          <Route path="/snapshots" element={<RoleRoute roles={['AUDITOR','ADMIN']}><Layout><Snapshots /></Layout></RoleRoute>} />
+          <Route path="/forensics" element={<RoleRoute roles={['AUDITOR','ADMIN']}><Layout><Forensics /></Layout></RoleRoute>} />
+          <Route path="/users"     element={<RoleRoute roles={['ADMIN']}><Layout><Users /></Layout></RoleRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
