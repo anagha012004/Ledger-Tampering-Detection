@@ -1,31 +1,38 @@
-# 🔒 Ledger Tampering Detection System
+# Ledger Tampering Detection System
+
+**Live Demo**: [https://ledger-tampering-detection.onrender.com](https://ledger-tampering-detection.onrender.com)
+
+> Hosted on Render free tier — may take ~30s to wake up on first visit.
 
 A demonstration project showing how distributed ledger systems detect data tampering through cryptographic hashing and consensus verification.
 
-## 📋 Project Overview
+## Project Overview
 
 This system simulates a distributed ledger network with multiple nodes. Each node maintains a copy of the transaction ledger, and any unauthorized modification to one node's data is immediately detected through hash comparison.
 
 ### Key Features
-- ✅ Multiple node simulation (Node-A, Node-B, Node-C)
-- ✅ SHA-256 cryptographic hashing
-- ✅ Real-time tampering detection
-- ✅ Interactive web dashboard
-- ✅ REST API for all operations
-- ✅ Transaction management
+- Multiple node simulation (Node-A, Node-B, Node-C)
+- SHA-256 cryptographic hashing & Merkle trees
+- Real-time tampering detection via WebSocket
+- Interactive React dashboard
+- REST API for all operations
+- JWT authentication with role-based access (ADMIN, AUDITOR, USER, VIEWER)
+- Audit logs, snapshots & forensics
 
-## 🏗️ Architecture
+## Architecture
 
 ```
            +-------------+
-           |  Dashboard  |
+           |  React SPA  |
            +-------------+
                   |
-                  | REST API
+                  | REST API + WebSocket
                   |
         +-------------------+
         |  Spring Boot App  |
         +-------------------+
+                  |
+            MongoDB Atlas
           /        |        \
          /         |         \
     Node-A      Node-B     Node-C
@@ -33,127 +40,116 @@ This system simulates a distributed ledger network with multiple nodes. Each nod
      Hash        Hash        Hash
 ```
 
-## 🛠️ Technologies Used
+## Technologies Used
 
 - **Backend**: Java 17, Spring Boot 3.2.0
-- **Hashing**: SHA-256
-- **Frontend**: HTML5, CSS3, JavaScript
-- **Build Tool**: Maven
-- **Libraries**: Lombok, Jackson
+- **Frontend**: React 19, Vite, React Router
+- **Database**: MongoDB Atlas
+- **Auth**: JWT (roles: ADMIN, AUDITOR, USER, VIEWER)
+- **Hashing**: SHA-256, Merkle Trees
+- **Real-time**: WebSocket (STOMP)
+- **Build**: Maven, Docker (multi-stage)
+- **Deployment**: Render
+- **Libraries**: Lombok, Jackson, jjwt
 
-## 📁 Project Structure
+## Project Structure
 
 ```
-ledger-tampering-detection/
-├── src/
-│   └── main/
-│       ├── java/com/ledger/
-│       │   ├── LedgerTamperingDetectionApplication.java
-│       │   ├── controller/
-│       │   │   └── LedgerController.java
-│       │   ├── service/
-│       │   │   ├── LedgerService.java
-│       │   │   └── HashService.java
-│       │   └── model/
-│       │       ├── Transaction.java
-│       │       ├── Ledger.java
-│       │       └── Node.java
-│       └── resources/
-│           ├── application.properties
-│           └── static/
-│               └── index.html
-└── pom.xml
+Ledger-Tampering-Detection/
+├── backend/
+│   ├── src/main/java/com/ledger/
+│   │   ├── controller/        # REST endpoints
+│   │   ├── service/           # Business logic
+│   │   ├── model/             # MongoDB documents
+│   │   ├── repository/        # Spring Data repos
+│   │   ├── security/          # JWT filter & config
+│   │   └── config/            # CORS, WebSocket
+│   └── pom.xml
+├── frontend/
+│   └── src/
+│       ├── pages/             # Dashboard, Alerts, Audit, etc.
+│       ├── components/        # Navbar, NodeCard, Toast
+│       ├── context/           # AuthContext
+│       ├── api/               # Axios API calls
+│       └── hooks/             # useAlertSocket
+├── Dockerfile                 # Multi-stage build
+├── render.yaml                # Render deployment config
+└── README.md
 ```
 
-## 🚀 Getting Started
+## Demo Credentials
+
+| Username | Password | Role    | Access                       |
+|----------|----------|---------|------------------------------|
+| admin    | admin123 | ADMIN   | Full access                  |
+| auditor  | audit123 | AUDITOR | Detect, forensics, snapshots |
+| user1    | user123  | USER    | Add transactions             |
+| viewer   | view123  | VIEWER  | Read-only                    |
+
+## Role-Based Access
+
+| Feature              | VIEWER | USER | AUDITOR | ADMIN |
+|----------------------|--------|------|---------|-------|
+| View nodes           | yes    | yes  | yes     | yes   |
+| Add transactions     | no     | yes  | yes     | yes   |
+| Detect tampering     | yes    | yes  | yes     | yes   |
+| Audit log            | yes    | yes  | yes     | yes   |
+| Alerts (view)        | yes    | yes  | yes     | yes   |
+| Alerts (resolve)     | no     | no   | yes     | yes   |
+| Integrity report     | yes    | yes  | yes     | yes   |
+| Snapshots/Forensics  | no     | no   | yes     | yes   |
+| Tamper/Reset/Users   | no     | no   | no      | yes   |
+
+## Getting Started (Local)
 
 ### Prerequisites
-- Java 17 or higher
+- Java 17+
 - Maven 3.6+
-- Any modern web browser
+- Node.js 20+
+- MongoDB (local or Atlas)
 
-### Installation & Running
+### Run Backend
+```bash
+cd backend
+mvn spring-boot:run
+```
 
-1. **Navigate to project directory**
-   ```bash
-   cd Ledger-Tampering-Detection
-   ```
+### Run Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-2. **Build the project**
-   ```bash
-   mvn clean install
-   ```
+Open: `http://localhost:5173`
 
-3. **Run the application**
-   ```bash
-   mvn spring-boot:run
-   ```
+## REST API Endpoints
 
-4. **Access the dashboard**
-   Open your browser and go to: `http://localhost:8080`
+### Auth
+```http
+POST /api/auth/login
+POST /api/auth/signup
+```
 
-## 📡 REST API Endpoints
-
-### Add Transaction
+### Transactions
 ```http
 POST /api/transaction
-Content-Type: application/json
-
-{
-  "id": 1,
-  "from": "UserA",
-  "to": "UserB",
-  "amount": 500
-}
-```
-
-### Tamper Node (Demo)
-```http
-POST /api/tamper?nodeId=Node-B&transactionId=1&newAmount=999
-```
-
-### Detect Tampering
-```http
-GET /api/detect
-```
-
-### Get All Nodes
-```http
-GET /api/nodes
-```
-
-### Get Specific Node
-```http
-GET /api/nodes/Node-A
-```
-
-### Reset System
-```http
+GET  /api/nodes
+GET  /api/detect
+POST /api/tamper?nodeId=Node-B&transactionId=TX-001&newAmount=999
 POST /api/reset
 ```
 
-## 🎯 How to Demonstrate
+### Reports
+```http
+GET /api/audit
+GET /api/alerts
+GET /api/integrity
+GET /api/forensics/{nodeId}
+GET /api/snapshots
+```
 
-### Scenario 1: Normal Operation
-1. Add a transaction (e.g., UserA → UserB, $500)
-2. Click "Refresh Nodes" - all nodes show same hash ✅
-3. Click "Detect Tampering" - shows "All nodes synchronized"
-
-### Scenario 2: Tampering Detection
-1. Add a transaction
-2. Select "Node-B" and tamper the transaction (change amount to $999)
-3. Click "Detect Tampering"
-4. System shows: ⚠️ **Tampering detected in Node-B**
-5. Node-B card turns red with "TAMPERED" status
-6. Hash comparison shows Node-B has different hash
-
-### Scenario 3: Multiple Transactions
-1. Add multiple transactions
-2. Tamper one transaction in Node-C
-3. System detects the specific tampered node
-4. Shows all transactions with modified data highlighted
-
-## 🔐 How It Works
+## How It Works
 
 ### 1. Hash Generation
 Each node generates a SHA-256 hash of its entire ledger:
@@ -161,7 +157,10 @@ Each node generates a SHA-256 hash of its entire ledger:
 Ledger Data → SHA-256 → Hash (64 characters)
 ```
 
-### 2. Tampering Detection Algorithm
+### 2. Merkle Tree
+Transactions are organized in a Merkle tree — any single change invalidates the root hash.
+
+### 3. Tampering Detection
 ```java
 referenceHash = nodes[0].hash
 for each node:
@@ -169,85 +168,34 @@ for each node:
         node.tampered = true
 ```
 
-### 3. Consensus Verification
+### 4. Consensus Verification
 - All nodes must have identical hashes
 - Any mismatch indicates tampering
 - Majority consensus determines valid state
 
-## 📊 Example Output
+## Deployment
 
-**Before Tampering:**
-```
-Node-A: Hash = 7f3a9c2b... ✅ OK
-Node-B: Hash = 7f3a9c2b... ✅ OK
-Node-C: Hash = 7f3a9c2b... ✅ OK
-Status: All nodes synchronized
-```
+Deployed as a single Docker container on Render:
+- Multi-stage Dockerfile builds React frontend and Spring Boot backend
+- React build is bundled into the Spring Boot JAR as static resources
+- MongoDB Atlas used as the cloud database
 
-**After Tampering Node-B:**
-```
-Node-A: Hash = 7f3a9c2b... ✅ OK
-Node-B: Hash = 8ac24f1d... ⚠️ TAMPERED
-Node-C: Hash = 7f3a9c2b... ✅ OK
-Status: ⚠ Tampering detected in Node-B
-```
+## Troubleshooting
 
-## 🎓 Educational Value
-
-This project demonstrates:
-- **Data Integrity**: How hashing ensures data hasn't been modified
-- **Distributed Trust**: Multiple nodes verify each other
-- **Cryptographic Security**: SHA-256 makes tampering detectable
-- **Consensus Mechanisms**: How blockchain systems maintain agreement
-- **Immutability Concept**: Changes are immediately visible
-
-## 🔧 Advanced Features (Optional Extensions)
-
-You can extend this project with:
-- Blockchain-style linking (previousHash)
-- Timestamp for each transaction
-- Digital signatures
-- Consensus algorithms (PBFT, PoW)
-- Network simulation with delays
-- Automatic node recovery
-- Merkle tree implementation
-
-## 📝 Testing with cURL
-
-```bash
-# Add transaction
-curl -X POST http://localhost:8080/api/transaction \
-  -H "Content-Type: application/json" \
-  -d '{"id":1,"from":"Alice","to":"Bob","amount":100}'
-
-# Tamper node
-curl -X POST "http://localhost:8080/api/tamper?nodeId=Node-B&transactionId=1&newAmount=999"
-
-# Detect tampering
-curl http://localhost:8080/api/detect
-
-# Get all nodes
-curl http://localhost:8080/api/nodes
-```
-
-## 🐛 Troubleshooting
-
-**Port 8080 already in use:**
+**Port already in use:**
 - Change port in `application.properties`: `server.port=8081`
 
 **Maven build fails:**
 - Ensure Java 17+ is installed: `java -version`
-- Update Maven: `mvn -version`
 
 **Dashboard not loading:**
-- Check if backend is running: `http://localhost:8080/api/nodes`
-- Check browser console for errors
+- Check backend: `http://localhost:8080/api/nodes`
 
-## 👨‍💻 Author
+## Author
 
 Created as an educational demonstration of distributed ledger security principles.
 
-## 📄 License
+## License
 
 This project is open source and available for educational purposes.
 
