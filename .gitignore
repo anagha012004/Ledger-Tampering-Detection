@@ -1,37 +1,28 @@
 # Maven
-target/
-pom.xml.tag
-pom.xml.releaseBackup
-pom.xml.versionsBackup
-pom.xml.next
-release.properties
-dependency-reduced-pom.xml
-buildNumber.properties
-.mvn/timing.properties
-.mvn/wrapper/maven-wrapper.jar
+backend/target/
+backend/data/
 
-# IDE
+# Node
+node_modules/
+frontend/node/
+blockchain/node_modules/
+
+# Build output
+frontend/dist/
+
+# Hardhat generated (compiled at runtime in Docker)
+blockchain/artifacts/
+blockchain/cache/
+blockchain/deployment.json
+
+# Credentials — never commit
+backend/.env
+backend/src/main/resources/application-local.properties
+
+# IDE / OS
 .idea/
-*.iml
-*.iws
-*.ipr
 .vscode/
-.settings/
-.classpath
-.project
-
-# OS
+*.iml
 .DS_Store
 Thumbs.db
-
-# Logs
 *.log
-logs/
-
-# Compiled
-*.class
-
-# Database
-data/
-
-node_modules/

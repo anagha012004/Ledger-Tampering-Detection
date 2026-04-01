@@ -28,43 +28,25 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-
-                // Static assets (Vite build output + SPA fallback)
-                .requestMatchers(
-                    "/", "/index.html", "/favicon.ico",
-                    "/assets/**", "/static/**",
-                    "/*.js", "/*.css", "/*.ico", "/*.png", "/*.svg", "/*.json"
-                ).permitAll()
-
-                // Public API endpoints
+                // Static assets
+                .requestMatchers("/", "/index.html", "/favicon.ico",
+                    "/assets/**", "/static/**", "/*.js", "/*.css", "/*.svg", "/*.png").permitAll()
+                // Public auth
                 .requestMatchers("/api/auth/login", "/api/auth/signup").permitAll()
-
-                // WebSocket + H2 console
-                .requestMatchers("/ws/**", "/h2-console/**").permitAll()
-
-                // Viewer: read-only
-                .requestMatchers(HttpMethod.GET,
-                    "/api/nodes/**", "/api/integrity",
-                    "/api/alerts/**", "/api/audit/**"
-                ).hasAnyRole("VIEWER", "USER", "AUDITOR", "ADMIN")
-
-                // User: add transactions
-                .requestMatchers(HttpMethod.POST, "/api/transaction")
+                // Blockchain — all authenticated roles can read
+                .requestMatchers(HttpMethod.GET, "/api/blockchain/**")
+                    .hasAnyRole("VIEWER", "USER", "AUDITOR", "ADMIN")
+                // Blockchain write — add transaction
+                .requestMatchers(HttpMethod.POST, "/api/blockchain/transaction")
                     .hasAnyRole("USER", "AUDITOR", "ADMIN")
-
-                // Auditor: detect + forensics + reports
-                .requestMatchers(HttpMethod.GET,
-                    "/api/detect", "/api/forensics/**",
-                    "/api/report/**", "/api/snapshots/**",
-                    "/api/security/publickey"
-                ).hasAnyRole("AUDITOR", "ADMIN")
-
-                // Admin only
-                .requestMatchers(
-                    "/api/tamper", "/api/reset", "/api/users/**",
-                    "/api/transaction/update", "/api/snapshots/create"
-                ).hasRole("ADMIN")
-
+                // Blockchain detect
+                .requestMatchers(HttpMethod.POST, "/api/blockchain/detect")
+                    .hasAnyRole("VIEWER", "USER", "AUDITOR", "ADMIN")
+                // Blockchain tamper + reset — admin only
+                .requestMatchers(HttpMethod.POST, "/api/blockchain/tamper", "/api/blockchain/reset")
+                    .hasRole("ADMIN")
+                // User management — admin only
+                .requestMatchers("/api/users/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .headers(h -> h.frameOptions(f -> f.disable()))

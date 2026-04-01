@@ -1,12 +1,16 @@
 {
   "name": "ledger-tampering-detection",
   "version": "1.0.0",
-  "description": "Distributed ledger tampering detection system",
+  "description": "Blockchain-based ledger tampering detection using Hardhat + Spring Boot + React",
   "scripts": {
-    "dev": "concurrently --kill-others --names \"BACKEND,FRONTEND\" --prefix-colors \"bgBlue.bold,bgMagenta.bold\" \"npm run backend\" \"npm run frontend\"",
-    "backend": "cd backend && mvn spring-boot:run",
-    "frontend": "cd frontend && npm run dev",
-    "install:frontend": "cd frontend && npm install"
+    "dev":                "concurrently --kill-others --names \"BLOCKCHAIN,BACKEND,FRONTEND\" --prefix-colors \"bgGreen.bold,bgBlue.bold,bgMagenta.bold\" \"npm run blockchain\" \"npm run backend\" \"npm run frontend\"",
+    "blockchain":         "cd blockchain && node bridge.js",
+    "backend":            "cd backend && mvn spring-boot:run -q",
+    "frontend":           "cd frontend && npm run dev",
+    "install:all":        "cd frontend && npm install && cd ../blockchain && npm install",
+    "blockchain:node":    "cd blockchain && npx hardhat node",
+    "blockchain:deploy":  "cd blockchain && npm run deploy",
+    "blockchain:test":    "cd blockchain && npm test"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"

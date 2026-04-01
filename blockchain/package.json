@@ -1,0 +1,21 @@
+{
+  "name": "blockchain",
+  "version": "1.0.0",
+  "main": "bridge.js",
+  "scripts": {
+    "node":    "npx hardhat node",
+    "compile": "npx hardhat compile",
+    "deploy":  "npx hardhat run scripts/deploy.js --network localhost",
+    "bridge":  "node bridge.js",
+    "test":    "npx hardhat test"
+  },
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "cors": "^2.8.6",
+    "ethers": "^6.16.0",
+    "express": "^5.2.1",
+    "hardhat": "^2.28.6"
+  }
+}

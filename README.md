@@ -1,204 +1,226 @@
-# Ledger Tampering Detection System
+# Ledger Tampering Detection
+
+A demonstration of blockchain-based ledger tampering detection using a real Ethereum smart contract.
 
 **Live Demo**: [https://ledger-tampering-detection.onrender.com](https://ledger-tampering-detection.onrender.com)
-
 > Hosted on Render free tier — may take ~30s to wake up on first visit.
 
-A demonstration project showing how distributed ledger systems detect data tampering through cryptographic hashing and consensus verification.
+---
 
-## Project Overview
+## How It Works
 
-This system simulates a distributed ledger network with multiple nodes. Each node maintains a copy of the transaction ledger, and any unauthorized modification to one node's data is immediately detected through hash comparison.
+Three ledger nodes (Node-A, Node-B, Node-C) are simulated inside a single Solidity smart contract. Each node stores transaction entries with a `keccak256` hash chain.
 
-### Key Features
-- Multiple node simulation (Node-A, Node-B, Node-C)
-- SHA-256 cryptographic hashing & Merkle trees
-- Real-time tampering detection via WebSocket
-- Interactive React dashboard
-- REST API for all operations
-- JWT authentication with role-based access (ADMIN, AUDITOR, USER, VIEWER)
-- Audit logs, snapshots & forensics
+**Normal flow** — `addTransaction()` writes an identical entry to all 3 nodes. Each entry's hash is computed from its data: `keccak256(id, from, to, amount, timestamp, previousHash)`.
+
+**Attack** — `tamperNode()` mutates an entry's `amount` directly in storage WITHOUT recomputing the hash. The data and hash are now inconsistent.
+
+**Detection** — `detectTampering()` recomputes every entry's hash on-chain and compares it to the stored hash. Any mismatch emits a `TamperingDetected` event and flags the node.
+
+```
+addTransaction("Alice", "Bob", 500)
+  → Node-A: entry #1, amount=500, hash=0x4a3f…  ✓
+  → Node-B: entry #1, amount=500, hash=0x4a3f…  ✓
+  → Node-C: entry #1, amount=500, hash=0x4a3f…  ✓
+
+tamperNode(nodeIndex=1, entryId=1, newAmount=9999)
+  → Node-B: entry #1, amount=9999, hash=0x4a3f…  ← hash still says 500!
+
+detectTampering()
+  → Node-A: recomputed=0x4a3f… == stored  ✓
+  → Node-B: recomputed=0x9b7e… != stored  ✗ TAMPERED
+  → Node-C: recomputed=0x4a3f… == stored  ✓
+```
+
+---
 
 ## Architecture
 
 ```
-           +-------------+
-           |  React SPA  |
-           +-------------+
-                  |
-                  | REST API + WebSocket
-                  |
-        +-------------------+
-        |  Spring Boot App  |
-        +-------------------+
-                  |
-            MongoDB Atlas
-          /        |        \
-         /         |         \
-    Node-A      Node-B     Node-C
-     Ledger      Ledger      Ledger
-     Hash        Hash        Hash
+┌─────────────────────────────────────────┐
+│              React Frontend             │
+│         (Vite · React Router)           │
+└──────────────────┬──────────────────────┘
+                   │ REST /api/*
+┌──────────────────▼──────────────────────┐
+│           Spring Boot Backend           │
+│    JWT Auth · /api/blockchain/* proxy   │
+└──────────────────┬──────────────────────┘
+                   │ REST :3001
+┌──────────────────▼──────────────────────┐
+│         Node.js Bridge (bridge.js)      │
+│           ethers.js · Express           │
+└──────────────────┬──────────────────────┘
+                   │ ethers.js
+┌──────────────────▼──────────────────────┐
+│       Hardhat In-Memory EVM Node        │
+│       LedgerTampering.sol contract      │
+│                                         │
+│  Node-A  │  Node-B  │  Node-C           │
+│  entries │  entries │  entries          │
+└─────────────────────────────────────────┘
 ```
 
-## Technologies Used
-
-- **Backend**: Java 17, Spring Boot 3.2.0
-- **Frontend**: React 19, Vite, React Router
-- **Database**: MongoDB Atlas
-- **Auth**: JWT (roles: ADMIN, AUDITOR, USER, VIEWER)
-- **Hashing**: SHA-256, Merkle Trees
-- **Real-time**: WebSocket (STOMP)
-- **Build**: Maven, Docker (multi-stage)
-- **Deployment**: Render
-- **Libraries**: Lombok, Jackson, jjwt
+---
 
 ## Project Structure
 
 ```
 Ledger-Tampering-Detection/
-├── backend/
-│   ├── src/main/java/com/ledger/
-│   │   ├── controller/        # REST endpoints
-│   │   ├── service/           # Business logic
-│   │   ├── model/             # MongoDB documents
-│   │   ├── repository/        # Spring Data repos
-│   │   ├── security/          # JWT filter & config
-│   │   └── config/            # CORS, WebSocket
-│   └── pom.xml
-├── frontend/
+├── blockchain/                  # Hardhat project
+│   ├── contracts/
+│   │   └── LedgerTampering.sol  # Core smart contract
+│   ├── scripts/
+│   │   └── deploy.js            # Deploy script (local dev)
+│   ├── test/
+│   │   └── LedgerTampering.test.js
+│   ├── bridge.js                # Express REST bridge (auto-deploys contract)
+│   └── hardhat.config.js
+│
+├── backend/                     # Spring Boot
+│   └── src/main/java/com/ledger/
+│       ├── controller/
+│       │   ├── AuthController.java          # Login, signup, user CRUD
+│       │   ├── BlockchainProxyController.java  # Proxies to bridge :3001
+│       │   └── GlobalExceptionHandler.java
+│       ├── model/User.java
+│       ├── repository/UserRepository.java
+│       ├── security/            # JWT filter + config
+│       └── service/UserService.java
+│
+├── frontend/                    # React + Vite
 │   └── src/
-│       ├── pages/             # Dashboard, Alerts, Audit, etc.
-│       ├── components/        # Navbar, NodeCard, Toast
-│       ├── context/           # AuthContext
-│       ├── api/               # Axios API calls
-│       └── hooks/             # useAlertSocket
-├── Dockerfile                 # Multi-stage build
-├── render.yaml                # Render deployment config
-└── README.md
+│       ├── api/index.js         # All API calls
+│       ├── context/AuthContext.jsx
+│       ├── components/Navbar.jsx
+│       └── pages/
+│           ├── Blockchain.jsx   # Main page — nodes, tamper, detect
+│           ├── Login.jsx
+│           └── Users.jsx        # Admin only
+│
+├── Dockerfile                   # Multi-stage: frontend + backend + bridge
+├── start.sh                     # Container entrypoint
+└── render.yaml                  # Render deployment config
 ```
 
-## Demo Credentials
+---
 
-| Username | Password | Role    | Access                       |
-|----------|----------|---------|------------------------------|
-| admin    | admin123 | ADMIN   | Full access                  |
-| auditor  | audit123 | AUDITOR | Detect, forensics, snapshots |
-| user1    | user123  | USER    | Add transactions             |
-| viewer   | view123  | VIEWER  | Read-only                    |
+## Tech Stack
 
-## Role-Based Access
+| Layer | Technology |
+|---|---|
+| Smart Contract | Solidity 0.8.24, Hardhat 2 |
+| Bridge | Node.js, Express, ethers.js v6 |
+| Backend | Java 17, Spring Boot 3.2, Spring Security, JWT |
+| Frontend | React 19, Vite, React Router |
+| Database | MongoDB Atlas (users only) |
+| Deployment | Docker, Render |
 
-| Feature              | VIEWER | USER | AUDITOR | ADMIN |
-|----------------------|--------|------|---------|-------|
-| View nodes           | yes    | yes  | yes     | yes   |
-| Add transactions     | no     | yes  | yes     | yes   |
-| Detect tampering     | yes    | yes  | yes     | yes   |
-| Audit log            | yes    | yes  | yes     | yes   |
-| Alerts (view)        | yes    | yes  | yes     | yes   |
-| Alerts (resolve)     | no     | no   | yes     | yes   |
-| Integrity report     | yes    | yes  | yes     | yes   |
-| Snapshots/Forensics  | no     | no   | yes     | yes   |
-| Tamper/Reset/Users   | no     | no   | no      | yes   |
+---
 
-## Getting Started (Local)
+## Local Development
 
 ### Prerequisites
+- Node.js 20+
 - Java 17+
 - Maven 3.6+
-- Node.js 20+
-- MongoDB (local or Atlas)
 
-### Run Backend
+### 1. Install dependencies
 ```bash
-cd backend
-mvn spring-boot:run
+npm run install:all
 ```
 
-### Run Frontend
+### 2. Terminal 1 — Hardhat node
 ```bash
-cd frontend
-npm install
-npm run dev
+npm run blockchain:node
+```
+Wait for: `Started HTTP and WebSocket JSON-RPC server at http://127.0.0.1:8545`
+
+### 3. Terminal 2 — Deploy contract + start bridge
+```bash
+npm run blockchain:deploy
+npm run blockchain
+```
+Wait for: `Bridge listening on http://localhost:3001`
+
+### 4. Terminal 3 — Backend
+```bash
+npm run backend
+```
+Wait for: `Started LedgerTamperingDetectionApplication`
+
+### 5. Terminal 4 — Frontend
+```bash
+npm run frontend
 ```
 
 Open: `http://localhost:5173`
 
-## REST API Endpoints
+---
 
-### Auth
-```http
-POST /api/auth/login
-POST /api/auth/signup
-```
+## Demo Credentials
 
-### Transactions
-```http
-POST /api/transaction
-GET  /api/nodes
-GET  /api/detect
-POST /api/tamper?nodeId=Node-B&transactionId=TX-001&newAmount=999
-POST /api/reset
-```
-
-### Reports
-```http
-GET /api/audit
-GET /api/alerts
-GET /api/integrity
-GET /api/forensics/{nodeId}
-GET /api/snapshots
-```
-
-## How It Works
-
-### 1. Hash Generation
-Each node generates a SHA-256 hash of its entire ledger:
-```
-Ledger Data → SHA-256 → Hash (64 characters)
-```
-
-### 2. Merkle Tree
-Transactions are organized in a Merkle tree — any single change invalidates the root hash.
-
-### 3. Tampering Detection
-```java
-referenceHash = nodes[0].hash
-for each node:
-    if node.hash != referenceHash:
-        node.tampered = true
-```
-
-### 4. Consensus Verification
-- All nodes must have identical hashes
-- Any mismatch indicates tampering
-- Majority consensus determines valid state
-
-## Deployment
-
-Deployed as a single Docker container on Render:
-- Multi-stage Dockerfile builds React frontend and Spring Boot backend
-- React build is bundled into the Spring Boot JAR as static resources
-- MongoDB Atlas used as the cloud database
-
-## Troubleshooting
-
-**Port already in use:**
-- Change port in `application.properties`: `server.port=8081`
-
-**Maven build fails:**
-- Ensure Java 17+ is installed: `java -version`
-
-**Dashboard not loading:**
-- Check backend: `http://localhost:8080/api/nodes`
-
-## Author
-
-Created as an educational demonstration of distributed ledger security principles.
-
-## License
-
-This project is open source and available for educational purposes.
+| Username | Password | Role | Access |
+|---|---|---|---|
+| admin | admin123 | ADMIN | Full access — tamper, reset, manage users |
+| auditor | audit123 | AUDITOR | Add transactions, detect tampering |
+| user1 | user123 | USER | Add transactions |
+| viewer | view123 | VIEWER | Read-only |
 
 ---
 
-**Note**: This is a demonstration project for learning purposes. Production blockchain systems require additional security measures, network protocols, and consensus algorithms.
+## Tampering Demo
+
+1. Log in as `admin`
+2. Add a few transactions (From: Alice, To: Bob, Amount: 500)
+3. Click **⚠ Tamper this node** on Node-B → set Entry ID: 1, New Amount: 9999 → **Execute Tamper**
+4. Click **🔍 Detect Tampering**
+5. Node-B turns red — stored hash no longer matches the tampered data
+6. Node-A and Node-C remain green — their data is untouched
+7. Click **⚠ Reset** to start over
+
+---
+
+## Smart Contract API
+
+| Function | Access | Description |
+|---|---|---|
+| `addTransaction(from, to, amount)` | public | Writes entry to all 3 nodes with hash chain |
+| `tamperNode(nodeIndex, entryId, newAmount)` | public | Mutates data without updating hash (attack demo) |
+| `detectTampering()` | public | Recomputes all hashes on-chain, flags mismatches |
+| `checkConsensus()` | view | Compares ledger hashes across all nodes |
+| `getEntries(nodeIndex)` | view | Returns all entries for a node |
+| `reset()` | owner only | Clears all contract state |
+
+---
+
+## Deployment (Render)
+
+The app runs as a single Docker container:
+
+```
+start.sh
+  ├── node bridge.js   → compiles + deploys contract to in-memory Hardhat EVM
+  └── java -jar app.jar → Spring Boot serves React + proxies to bridge
+```
+
+### Deploy steps
+1. Push to GitHub
+2. In Render dashboard → set environment variables:
+   ```
+   JWT_SECRET  = <your-secret>
+   MONGODB_URI = <your-atlas-uri>
+   ```
+3. Render auto-builds from `Dockerfile` on every push
+
+> The in-memory Hardhat network resets on container restart. This is expected for a demo — add transactions after the page loads.
+
+---
+
+## Run Tests
+
+```bash
+npm run blockchain:test
+```
+
+7 tests covering: deploy, add transaction, hash consistency, tamper detection, clean validation, reset.
