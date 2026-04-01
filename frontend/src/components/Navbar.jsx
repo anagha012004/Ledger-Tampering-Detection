@@ -9,8 +9,10 @@ export default function Navbar() {
   const navigate = useNavigate()
 
   const links = [
-    { to: '/dashboard', label: '⛓ Blockchain', roles: ['VIEWER', 'USER', 'AUDITOR', 'ADMIN'] },
-    { to: '/users',     label: '👥 Users',      roles: ['ADMIN'] },
+    { to: '/dashboard',  label: '⛓ Blockchain',  roles: ['VIEWER', 'USER', 'AUDITOR', 'ADMIN'] },
+    { to: '/analytics',  label: '📊 Analytics',   roles: ['VIEWER', 'USER', 'AUDITOR', 'ADMIN'] },
+    { to: '/audit',      label: '📋 Audit Log',   roles: ['VIEWER', 'USER', 'AUDITOR', 'ADMIN'] },
+    { to: '/users',      label: '👥 Users',       roles: ['ADMIN'] },
   ]
 
   return (

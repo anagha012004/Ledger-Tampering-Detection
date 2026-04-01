@@ -166,6 +166,50 @@ app.post("/reset", async (_, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.get("/stats", async (_, res) => {
+  try {
+    const s = await contract.getStats();
+    res.json({
+      totalTransactions: Number(s.totalTransactions),
+      tamperCount:       Number(s.tamperCount),
+      detectCount:       Number(s.detectCount),
+      tamperedNodeCount: Number(s.tamperedNodeCount),
+      contractAge:       Number(s.contractAge),
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get("/tamper-history", async (_, res) => {
+  try {
+    const raw = await contract.getTamperHistory();
+    res.json(raw.map(r => ({
+      nodeIndex: Number(r.nodeIndex),
+      nodeId:    r.nodeId,
+      entryId:   Number(r.entryId),
+      newAmount: Number(r.newAmount),
+      timestamp: Number(r.timestamp),
+    })));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get("/events", async (_, res) => {
+  try {
+    const iface    = contract.interface;
+    const provider = contract.runner.provider;
+    const addr     = await contract.getAddress();
+    const logs     = await provider.getLogs({ address: addr, fromBlock: 0, toBlock: "latest" });
+    const events   = logs.map(log => {
+      try {
+        const parsed = iface.parseLog(log);
+        return { name: parsed.name, args: Object.fromEntries(
+          parsed.fragment.inputs.map((inp, i) => [inp.name, parsed.args[i]?.toString()])
+        ), blockNumber: log.blockNumber, txHash: log.transactionHash };
+      } catch { return null; }
+    }).filter(Boolean).reverse();
+    res.json(events);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── Start ──────────────────────────────────────────────────────────────────────
 const PORT = process.env.BRIDGE_PORT || 3001;
 

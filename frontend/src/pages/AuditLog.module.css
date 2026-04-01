@@ -1,0 +1,37 @@
+.page { padding: 1.5rem; max-width: 1100px; margin: 0 auto; }
+.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .25rem; }
+.header h2 { margin: 0; color: #e2e8f0; }
+.sub { font-size: .82rem; color: #6b7280; margin-bottom: 1.25rem; }
+
+.summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: .75rem; margin-bottom: 1.25rem; }
+.summaryCard { background: #1e1e2e; border-radius: 10px; padding: .9rem 1rem; display: flex;
+  flex-direction: column; align-items: center; gap: .2rem; border: 1px solid; }
+.summaryIcon  { font-size: 1.4rem; }
+.summaryCount { font-size: 1.6rem; font-weight: 700; }
+.summaryLabel { font-size: .72rem; color: #6b7280; text-align: center; }
+
+.filters { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.filterBtn { padding: .35rem .8rem; border-radius: 999px; font-size: .78rem; background: #1e1e2e;
+  border: 1px solid #2d2d3f; color: #9ca3af; cursor: pointer; }
+.filterBtn:hover { border-color: #6366f1; color: #e2e8f0; }
+.filterActive { background: #312e81; border-color: #6366f1; color: #c7d2fe; }
+
+.events { display: flex; flex-direction: column; gap: .4rem; }
+.empty  { text-align: center; padding: 3rem; color: #4b5563; }
+
+.eventRow { background: #1e1e2e; border: 1px solid #2d2d3f; border-radius: 8px;
+  padding: .75rem 1rem; cursor: pointer; transition: border-color .15s; }
+.eventRow:hover { border-color: #6366f1; }
+.eventMain { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+.eventIcon    { font-size: 1.1rem; flex-shrink: 0; }
+.eventName    { font-weight: 700; font-size: .85rem; min-width: 160px; }
+.eventSummary { font-size: .82rem; color: #9ca3af; flex: 1; }
+.eventBlock   { font-size: .72rem; color: #4b5563; margin-left: auto; }
+.eventDetail  { margin-top: .6rem; padding-top: .6rem; border-top: 1px solid #1f2937;
+  font-size: .75rem; color: #6b7280; display: flex; flex-direction: column; gap: .2rem; }
+.eventDetail code { color: #818cf8; font-size: .7rem; word-break: break-all; }
+
+button { padding: .45rem .9rem; border-radius: 6px; border: none; cursor: pointer;
+  font-size: .85rem; font-weight: 600; background: #374151; color: #e5e7eb; }
+button:hover { opacity: .85; }
+button:disabled { opacity: .4; }

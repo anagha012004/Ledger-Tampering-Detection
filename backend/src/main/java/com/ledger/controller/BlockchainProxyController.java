@@ -67,6 +67,21 @@ public class BlockchainProxyController {
         return proxy(() -> rest.postForEntity(BRIDGE + "/reset", null, Map.class));
     }
 
+    @GetMapping("/stats")
+    public ResponseEntity<Map> stats() {
+        return proxy(() -> rest.getForEntity(BRIDGE + "/stats", Map.class));
+    }
+
+    @GetMapping("/tamper-history")
+    public ResponseEntity<List> tamperHistory() {
+        return proxy(() -> rest.getForEntity(BRIDGE + "/tamper-history", List.class));
+    }
+
+    @GetMapping("/events")
+    public ResponseEntity<List> events() {
+        return proxy(() -> rest.getForEntity(BRIDGE + "/events", List.class));
+    }
+
     // ── Helper ────────────────────────────────────────────────────────────────
 
     @FunctionalInterface

@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
-import Navbar    from './components/Navbar'
-import Login     from './pages/Login'
+import Navbar     from './components/Navbar'
+import Login      from './pages/Login'
 import Blockchain from './pages/Blockchain'
-import Users     from './pages/Users'
+import AuditLog   from './pages/AuditLog'
+import Analytics  from './pages/Analytics'
+import Users      from './pages/Users'
 
 function PrivateRoute({ children }) {
   const { auth } = useAuth()
@@ -31,10 +33,12 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/"          element={<Login />} />
-          <Route path="/dashboard" element={<PrivateRoute><Layout><Blockchain /></Layout></PrivateRoute>} />
-          <Route path="/users"     element={<RoleRoute roles={['ADMIN']}><Layout><Users /></Layout></RoleRoute>} />
-          <Route path="*"          element={<Navigate to="/" replace />} />
+          <Route path="/"           element={<Login />} />
+          <Route path="/dashboard"  element={<PrivateRoute><Layout><Blockchain /></Layout></PrivateRoute>} />
+          <Route path="/audit"      element={<PrivateRoute><Layout><AuditLog  /></Layout></PrivateRoute>} />
+          <Route path="/analytics"  element={<PrivateRoute><Layout><Analytics /></Layout></PrivateRoute>} />
+          <Route path="/users"      element={<RoleRoute roles={['ADMIN']}><Layout><Users /></Layout></RoleRoute>} />
+          <Route path="*"           element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
