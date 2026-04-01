@@ -1,16 +1,19 @@
 /**
- * bridge.js — Self-contained bridge.
- * Spins up an in-memory Hardhat node, deploys LedgerTampering.sol,
- * then exposes REST endpoints for Spring Boot to proxy through.
+ * bridge.js — Self-contained blockchain bridge.
  *
- * No external `hardhat node` or `deployment.json` needed.
+ * Starts a Hardhat in-process EVM, deploys LedgerTampering.sol from the
+ * pre-compiled artifact, then exposes REST endpoints on :3001.
+ *
+ * Must be run from the /blockchain directory (cd /blockchain && node bridge.js)
+ * so that hardhat.config.js is found.
  */
+
+process.chdir(__dirname);
 
 const express    = require("express");
 const cors       = require("cors");
 const { ethers } = require("ethers");
 const hre        = require("hardhat");
-const path       = require("path");
 
 const app = express();
 app.use(cors());
@@ -19,19 +22,18 @@ app.use(express.json());
 const NODE_NAMES = ["Node-A", "Node-B", "Node-C"];
 let contract;
 
-// ── Boot: compile + deploy to in-memory Hardhat network ───────────────────────
+// ── Boot: start in-process Hardhat network + deploy ───────────────────────────
 async function boot() {
-  console.log("Compiling contract...");
-  await hre.run("compile", { quiet: true });
+  // hre uses the hardhat network by default (in-process EVM, no external node needed)
+  const [deployer] = await hre.ethers.getSigners();
+  console.log("Deploying with:", deployer.address);
 
-  console.log("Deploying LedgerTampering to in-memory network...");
-  const Factory = await hre.ethers.getContractFactory("LedgerTampering");
+  const Factory  = await hre.ethers.getContractFactory("LedgerTampering");
   const deployed = await Factory.deploy();
   await deployed.waitForDeployment();
 
-  const address = await deployed.getAddress();
   contract = deployed;
-  console.log(`Contract deployed at ${address}`);
+  console.log("Contract deployed at:", await contract.getAddress());
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────

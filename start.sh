@@ -2,7 +2,7 @@
 # start.sh — launches bridge (background) then Spring Boot (foreground)
 
 echo "Starting blockchain bridge..."
-node /blockchain/bridge.js &
+cd /blockchain && node bridge.js &
 BRIDGE_PID=$!
 
 # Wait for bridge to be ready (max 60s)
