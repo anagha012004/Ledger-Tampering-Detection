@@ -2,8 +2,7 @@
 # start.sh — launches bridge (background) then Spring Boot (foreground)
 
 echo "Starting blockchain bridge..."
-cd /blockchain && node bridge.js &
-BRIDGE_PID=$!
+cd /blockchain && node bridge.js > /var/log/bridge.log 2>&1 &
 
 # Wait for bridge to be ready (max 60s)
 echo "Waiting for bridge on :3001..."
@@ -15,5 +14,5 @@ for i in $(seq 1 30); do
   sleep 2
 done
 
-echo "Starting Spring Boot..."
+echo "Starting Spring Boot on port ${PORT:-8080}..."
 exec java -jar /app/app.jar
