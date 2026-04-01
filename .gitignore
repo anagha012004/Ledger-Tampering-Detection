@@ -33,3 +33,5 @@ logs/
 
 # Database
 data/
+
+node_modules/
