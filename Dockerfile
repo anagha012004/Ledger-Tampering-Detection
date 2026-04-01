@@ -15,25 +15,42 @@ COPY backend/src ./src
 COPY --from=frontend-build /frontend/dist ./src/main/resources/static
 RUN mvn clean package -DskipTests -q -Dcopy-frontend.skip=true
 
-# Stage 3: Install blockchain bridge deps + compile contract
+# Stage 3: Install blockchain deps + compile contract offline
 FROM node:20-alpine AS blockchain-build
 WORKDIR /blockchain
 COPY blockchain/package*.json ./
 RUN npm install
+
 COPY blockchain/ ./
-RUN npx hardhat compile
+
+# Copy the solc compiler from the npm package into Hardhat's compiler cache
+# so Hardhat never needs to download it from the internet
+RUN node -e " \
+  const fs   = require('fs'); \
+  const path = require('path'); \
+  const solc = require('solc'); \
+  const fullVer = solc.version().replace('.Emscripten.clang',''); \
+  const dest = path.join(require('os').homedir(), '.cache', 'hardhat-nodejs', 'compilers-v2', 'wasm'); \
+  fs.mkdirSync(dest, { recursive: true }); \
+  const src = path.join(path.dirname(require.resolve('solc')), 'soljson.js'); \
+  const out = path.join(dest, 'soljson-v' + fullVer + '.js'); \
+  fs.copyFileSync(src, out); \
+  console.log('Compiler cached:', out); \
+"
+
+RUN HARDHAT_DISABLE_TELEMETRY_PROMPT=1 npx hardhat compile
 
 # Stage 4: Final runtime image — Node + Java together
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-# Install Node.js into the JRE image
+# Install Node.js and wget
 RUN apk add --no-cache nodejs npm wget
 
 # Copy Spring Boot JAR
 COPY --from=backend-build /backend/target/ledger-tampering-detection-1.0.0.jar app.jar
 
-# Copy blockchain bridge (with node_modules and compiled artifacts)
+# Copy blockchain bridge with node_modules and compiled artifacts
 COPY --from=blockchain-build /blockchain /blockchain
 
 # Copy startup script
