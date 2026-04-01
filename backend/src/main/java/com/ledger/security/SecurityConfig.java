@@ -10,7 +10,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 
 @Configuration
 @EnableWebSecurity
@@ -28,12 +27,8 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            // Disable the default restrictive security headers that block fonts/scripts
-            .headers(headers -> headers
-                .contentSecurityPolicy(csp -> csp.disable())
-                .frameOptions(frame -> frame.disable())
-                .contentTypeOptions(ct -> ct.disable())
-            )
+            // Disable all default security headers — they block fonts/scripts in the SPA
+            .headers(headers -> headers.disable())
             .authorizeHttpRequests(auth -> auth
                 // Static frontend assets — always public
                 .requestMatchers(
