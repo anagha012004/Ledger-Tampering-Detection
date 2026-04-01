@@ -10,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 
 @Configuration
 @EnableWebSecurity
@@ -27,21 +28,30 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            // Disable the default restrictive security headers that block fonts/scripts
+            .headers(headers -> headers
+                .contentSecurityPolicy(csp -> csp.disable())
+                .frameOptions(frame -> frame.disable())
+                .contentTypeOptions(ct -> ct.disable())
+            )
             .authorizeHttpRequests(auth -> auth
-                // Static assets
-                .requestMatchers("/", "/index.html", "/favicon.ico",
-                    "/assets/**", "/static/**", "/*.js", "/*.css", "/*.svg", "/*.png").permitAll()
-                // Public auth
+                // Static frontend assets — always public
+                .requestMatchers(
+                    "/", "/index.html", "/favicon.svg", "/favicon.ico",
+                    "/assets/**", "/*.js", "/*.css", "/*.svg",
+                    "/*.png", "/*.woff", "/*.woff2", "/*.ico"
+                ).permitAll()
+                // Public auth endpoints
                 .requestMatchers("/api/auth/login", "/api/auth/signup").permitAll()
-                // Blockchain — all authenticated roles can read
+                // Blockchain read — all authenticated roles
                 .requestMatchers(HttpMethod.GET, "/api/blockchain/**")
                     .hasAnyRole("VIEWER", "USER", "AUDITOR", "ADMIN")
-                // Blockchain write — add transaction
-                .requestMatchers(HttpMethod.POST, "/api/blockchain/transaction")
-                    .hasAnyRole("USER", "AUDITOR", "ADMIN")
-                // Blockchain detect
+                // Blockchain detect — all authenticated roles
                 .requestMatchers(HttpMethod.POST, "/api/blockchain/detect")
                     .hasAnyRole("VIEWER", "USER", "AUDITOR", "ADMIN")
+                // Blockchain add transaction
+                .requestMatchers(HttpMethod.POST, "/api/blockchain/transaction")
+                    .hasAnyRole("USER", "AUDITOR", "ADMIN")
                 // Blockchain tamper + reset — admin only
                 .requestMatchers(HttpMethod.POST, "/api/blockchain/tamper", "/api/blockchain/reset")
                     .hasRole("ADMIN")
@@ -49,7 +59,6 @@ public class SecurityConfig {
                 .requestMatchers("/api/users/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
-            .headers(h -> h.frameOptions(f -> f.disable()))
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
